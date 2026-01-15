@@ -2,6 +2,14 @@
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=200&section=header&text=Aadhaar%20Data%20Analytics&fontSize=50&animation=fadeIn" />
 </p>
 
+<!-- FUN: Typing Animation -->
+<p align="center">
+  <a href="https://git.io/typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&pause=1000&color=2ECC71&center=true&vCenter=true&width=435&lines=Detecting+Ghosts...%F0%9F%91%BB;Predicting+the+Future...%F0%9F%94%AE;Solving+the+%E2%82%B965+Crore+Crisis...%F0%9F%92%B0" alt="Typing SVG" />
+  </a>
+</p>
+
+
 <p align="center">
   <b>UIDAI Hackathon 2026: UNLOCKING THE SECRET INSIGHTS</b>
 </p>
@@ -71,3 +79,7 @@ python analysis.py
 ---
 
 > **"Data isn't about numbers. It's about finding the Ghosts before they disappear."**
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" />
+</p>
