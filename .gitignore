@@ -18,7 +18,9 @@ ENV/
 
 # Jupyter
 .ipynb_checkpoints/
+# Ignore notebooks everywhere EXCEPT the notebooks/ directory
 *.ipynb
+!notebooks/*.ipynb
 
 # OS
 .DS_Store
