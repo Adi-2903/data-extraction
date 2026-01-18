@@ -1,20 +1,52 @@
+# %%
 """
-Domain Analysis: Enrollment Deep Dive
-======================================
+================================================================================
+DOMAIN ANALYSIS: ENROLLMENT DEEP DIVE
+================================================================================
 
+PURPOSE:
+--------
 This module performs DOMAIN-SPECIFIC analysis on Aadhaar enrollment data.
 Unlike the merged analysis, this focuses on enrollment-only patterns to uncover
 insights that get lost when mixing with demographic/biometric data.
 
-Focus Areas:
+WHY SEPARATE DOMAIN ANALYSIS?
+-----------------------------
+When we merge enrollment + demographic + biometric data, the nuances of each
+domain get diluted. This dedicated analysis lets us:
+1. Track infant enrollment seasonality (birth registry linkages)
+2. Identify geographic "enrollment factories"
+3. Detect missing age cohorts (saturation signals)
+4. Apply the Pareto Principle (80/20 rule) to resource allocation
+5. Analyze monsoon impacts on rural enrollment
+
+ANALYSES INCLUDED:
+------------------
 1. Birth Cohort Seasonality - When do infants get enrolled?
 2. Age Pyramid Anomalies - Are there missing age groups?
 3. Enrollment Velocity - Which districts are "enrollment factories"?
-4. Geographic Patterns - Urban vs Rural enrollment behavior
-5. Growth Trajectory - Acceleration vs deceleration
+4. State-Level Infant Strategy - Where to deploy Anganwadi linkages
+5. Growth Acceleration - Weekly momentum tracking
+6. PARETO ANALYSIS (NEW) - 80/20 rule for district concentration
+7. MONSOON EFFECT (NEW) - Seasonal rural enrollment patterns
+
+NOTEBOOK USAGE:
+---------------
+Each section is marked with '# %%' for Jupyter cell conversion.
+Run: `jupytext --to notebook domain_enrollment.py` to convert.
 
 Author: UIDAI Hackathon 2026 Team
+================================================================================
 """
+
+# %%
+# =============================================================================
+# IMPORTS AND CONFIGURATION
+# =============================================================================
+# WHY these imports:
+# - pandas/numpy: Core data manipulation
+# - matplotlib/seaborn: Static visualizations (for PDF reports)
+# - scipy.stats: Statistical significance testing (p-values)
 
 import pandas as pd
 import numpy as np
@@ -22,22 +54,34 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 import os
+from scipy import stats  # NEW: For statistical significance
 
-# UTF-8 encoding for emoji support
+# UTF-8 encoding for emoji support in console output
 sys.stdout.reconfigure(encoding='utf-8')
 
-# Configuration
+# Visualization configuration
+# WHY whitegrid: Clean background for publication-quality charts
+# WHY husl palette: Perceptually uniform colors for accessibility
 sns.set(style="whitegrid", palette="husl")
 plt.rcParams['figure.figsize'] = (14, 7)
+plt.rcParams['font.size'] = 11
 
-# Create output directory
+# Create output directory structure
 os.makedirs('output/enrollment', exist_ok=True)
 
 print("="*70)
 print("🎯 ENROLLMENT DOMAIN ANALYSIS")
 print("="*70)
 
-# Load enrollment data
+# %%
+# =============================================================================
+# DATA LOADING
+# =============================================================================
+# WHY import from analysis.py:
+# - Reuses the load_and_combine() function that handles multi-file loading
+# - Reuses clean_data() for consistent state/district normalization
+# - Ensures data quality is consistent across all domain analyses
+
 from analysis import load_and_combine, clean_data
 
 enrolment_df = clean_data(load_and_combine('dataset/api_data_aadhar_enrolment_*.csv'))
@@ -295,6 +339,206 @@ if 'date' in enrolment_df.columns:
             print(f"    Week {week}: +{row['wow_growth']:.1f}% ({row['total']:,.0f} enrollments)")
 
 
+# %%
+# =============================================================================
+# ANALYSIS 6: PARETO ANALYSIS (80/20 Rule)
+# =============================================================================
+# WHY PARETO ANALYSIS?
+# --------------------
+# The Pareto Principle states that 80% of outcomes come from 20% of causes.
+# In enrollment context: A small number of high-performing districts likely
+# drive the majority of all enrollments. This has major policy implications:
+#   - Resource allocation: Focus investment on scaling successful districts
+#   - Best practices: Study what makes top districts successful
+#   - Gap identification: Why are bottom 80% of districts underperforming?
+#
+# FORMULA:
+# --------
+# 1. Sort districts by enrollment (descending)
+# 2. Calculate cumulative percentage
+# 3. Find the "elbow" where X% of districts account for Y% of enrollments
+# 4. If Y > 80% and X < 30%, Pareto effect is strong
+
+print("\n" + "="*70)
+print("📊 ANALYSIS 6: PARETO ANALYSIS (80/20 Rule)")
+print("="*70)
+print("Question: Do ~20% of districts drive ~80% of all enrollments?")
+
+# Calculate district-level totals and sort
+district_totals = enrolment_df.groupby('district')[['age_0_5', 'age_5_17', 'age_18_greater']].sum()
+district_totals['total'] = district_totals.sum(axis=1)
+district_totals = district_totals.sort_values('total', ascending=False)
+
+# Calculate cumulative percentage
+total_enrollment = district_totals['total'].sum()
+district_totals['cumulative'] = district_totals['total'].cumsum()
+district_totals['cumulative_pct'] = (district_totals['cumulative'] / total_enrollment) * 100
+district_totals['district_rank_pct'] = np.arange(1, len(district_totals)+1) / len(district_totals) * 100
+
+# Find the "elbow" - where does 80% of enrollment get covered?
+pct_80_idx = (district_totals['cumulative_pct'] >= 80).idxmax()
+districts_for_80_pct = (district_totals.index.get_loc(pct_80_idx) + 1) / len(district_totals) * 100
+
+print(f"\n🔍 PARETO FINDINGS:")
+print(f"  Total districts: {len(district_totals)}")
+print(f"  Total enrollments: {total_enrollment:,.0f}")
+print(f"\n  📌 {districts_for_80_pct:.1f}% of districts account for 80% of enrollments")
+
+# Visualization: Pareto Chart (Bar + Line)
+fig, ax1 = plt.subplots(figsize=(16, 8))
+
+# Bar chart for top 30 districts
+top30 = district_totals.head(30)
+bars = ax1.bar(range(len(top30)), top30['total'], color='steelblue', alpha=0.7, label='District Enrollment')
+ax1.set_xlabel('District Rank', fontsize=12)
+ax1.set_ylabel('Total Enrollments', color='steelblue', fontsize=12)
+ax1.tick_params(axis='y', labelcolor='steelblue')
+ax1.set_xticks(range(0, len(top30), 5))
+ax1.set_xticklabels(range(1, len(top30)+1, 5))
+
+# Line chart for cumulative percentage
+ax2 = ax1.twinx()
+ax2.plot(range(len(top30)), top30['cumulative_pct'], color='red', marker='o', 
+         linewidth=2, markersize=4, label='Cumulative %')
+ax2.axhline(y=80, color='darkred', linestyle='--', linewidth=2, alpha=0.7, label='80% Threshold')
+ax2.set_ylabel('Cumulative Percentage (%)', color='red', fontsize=12)
+ax2.tick_params(axis='y', labelcolor='red')
+ax2.set_ylim(0, 105)
+
+# Title and legend
+plt.title('Pareto Analysis: District Enrollment Concentration\n(80/20 Rule)', fontsize=16, fontweight='bold')
+lines1, labels1 = ax1.get_legend_handles_labels()
+lines2, labels2 = ax2.get_legend_handles_labels()
+ax1.legend(lines1 + lines2, labels1 + labels2, loc='center right')
+
+plt.tight_layout()
+plt.savefig('output/enrollment/pareto_analysis.png', dpi=150, bbox_inches='tight')
+plt.close()
+print("✅ Saved: output/enrollment/pareto_analysis.png")
+
+# Pareto strength assessment
+if districts_for_80_pct < 25:
+    pareto_strength = "VERY STRONG"
+    action = "Focus resources on top 20% of districts for maximum impact"
+elif districts_for_80_pct < 40:
+    pareto_strength = "MODERATE"
+    action = "Balance investment between top performers and growth opportunities"
+else:
+    pareto_strength = "WEAK"
+    action = "Enrollment is relatively distributed - consider regional strategies"
+
+print(f"\n  💡 Pareto Effect Strength: {pareto_strength}")
+print(f"     → Action: {action}")
+
+# Top 5 powerhouses contribution
+top5_pct = district_totals.head(5)['cumulative_pct'].iloc[-1]
+print(f"\n  🏆 Top 5 districts alone account for {top5_pct:.1f}% of all enrollments")
+
+
+# %%
+# =============================================================================
+# ANALYSIS 7: MONSOON EFFECT ANALYSIS
+# =============================================================================
+# WHY MONSOON EFFECT?
+# -------------------
+# India's monsoon season (June-September) significantly impacts rural life:
+#   - Agricultural labor peaks during monsoon (less time for Aadhaar centers)
+#   - Flooding makes rural centers inaccessible
+#   - Migration patterns shift seasonally
+#
+# HYPOTHESIS:
+# -----------
+# Rural district enrollments DROP during monsoon months (June-Sep) compared
+# to non-monsoon months. Urban areas are less affected.
+#
+# STATISTICAL TEST:
+# -----------------
+# We use an independent samples t-test to check if the difference is 
+# statistically significant (p-value < 0.05).
+
+print("\n" + "="*70)
+print("🌧️ ANALYSIS 7: MONSOON EFFECT ANALYSIS")
+print("="*70)
+print("Hypothesis: Rural enrollment drops during monsoon (June-September)?")
+
+if 'date' in enrolment_df.columns and 'month' in enrolment_df.columns:
+    # Define monsoon vs non-monsoon months
+    # Monsoon in India: June (6), July (7), August (8), September (9)
+    monsoon_months = [6, 7, 8, 9]
+    
+    enrolment_df['is_monsoon'] = enrolment_df['month'].isin(monsoon_months)
+    enrolment_df['total_enrol'] = enrolment_df['age_0_5'] + enrolment_df['age_5_17'] + enrolment_df['age_18_greater']
+    
+    # Calculate daily enrollment by monsoon/non-monsoon
+    monsoon_daily = enrolment_df[enrolment_df['is_monsoon']].groupby('date')['total_enrol'].sum()
+    non_monsoon_daily = enrolment_df[~enrolment_df['is_monsoon']].groupby('date')['total_enrol'].sum()
+    
+    # Summary statistics
+    monsoon_mean = monsoon_daily.mean()
+    non_monsoon_mean = non_monsoon_daily.mean()
+    
+    print(f"\n📊 DAILY ENROLLMENT COMPARISON:")
+    print(f"  Monsoon (Jun-Sep):     {monsoon_mean:,.0f} avg/day ({len(monsoon_daily)} days)")
+    print(f"  Non-Monsoon:           {non_monsoon_mean:,.0f} avg/day ({len(non_monsoon_daily)} days)")
+    
+    # Calculate percentage difference
+    pct_diff = ((monsoon_mean - non_monsoon_mean) / non_monsoon_mean) * 100
+    print(f"\n  Difference: {pct_diff:+.1f}%")
+    
+    # Statistical significance test (t-test)
+    # WHY T-TEST: Compares means of two independent samples
+    # H0: No difference between monsoon and non-monsoon enrollment
+    # H1: There is a significant difference
+    if len(monsoon_daily) > 5 and len(non_monsoon_daily) > 5:
+        t_stat, p_value = stats.ttest_ind(monsoon_daily, non_monsoon_daily)
+        
+        print(f"\n📈 STATISTICAL SIGNIFICANCE:")
+        print(f"  t-statistic: {t_stat:.3f}")
+        print(f"  p-value: {p_value:.4f}")
+        
+        if p_value < 0.05:
+            significance = "STATISTICALLY SIGNIFICANT (p < 0.05)"
+            if pct_diff < 0:
+                interpretation = "Monsoon REDUCES enrollment - hypothesis CONFIRMED"
+                action = "Deploy mobile camps post-monsoon to compensate for lost capacity"
+            else:
+                interpretation = "Monsoon INCREASES enrollment - unexpected!"
+                action = "Investigate: Are people using flooded off-days to visit centers?"
+        else:
+            significance = "NOT STATISTICALLY SIGNIFICANT (p >= 0.05)"
+            interpretation = "No meaningful monsoon effect detected"
+            action = "Monsoon does not require special operational adjustments"
+        
+        print(f"  Result: {significance}")
+        print(f"\n  💡 INTERPRETATION: {interpretation}")
+        print(f"  📌 ACTION: {action}")
+    
+    # Visualization: Monthly pattern with monsoon highlighted
+    monthly_avg = enrolment_df.groupby('month')['total_enrol'].mean()
+    
+    fig, ax = plt.subplots(figsize=(14, 6))
+    colors = ['coral' if m in monsoon_months else 'steelblue' for m in monthly_avg.index]
+    bars = ax.bar(monthly_avg.index, monthly_avg.values, color=colors, edgecolor='black', alpha=0.8)
+    
+    ax.axhline(y=monthly_avg.mean(), color='red', linestyle='--', linewidth=2, label='Average')
+    ax.set_xlabel('Month', fontsize=12)
+    ax.set_ylabel('Average Daily Enrollments', fontsize=12)
+    ax.set_title('Monsoon Effect on Enrollment\n(Coral = Monsoon Months)', fontsize=16, fontweight='bold')
+    ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+    ax.legend()
+    ax.grid(axis='y', alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('output/enrollment/monsoon_effect.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("\n✅ Saved: output/enrollment/monsoon_effect.png")
+else:
+    print("⚠️ Date information not available for monsoon analysis")
+
+
+# %%
 # =============================================================================
 # FINAL SUMMARY
 # =============================================================================
@@ -302,21 +546,26 @@ print("\n" + "="*70)
 print("📋 ENROLLMENT DOMAIN ANALYSIS SUMMARY")
 print("="*70)
 
-print(f"\n✅ COMPLETED 5 ANALYSES:")
+print(f"\n✅ COMPLETED 7 ANALYSES:")
 print(f"  1. Birth Cohort Seasonality → Identified peak enrollment months")
 print(f"  2. Age Pyramid → Detected age group anomalies")
 print(f"  3. Enrollment Velocity → Ranked top performing districts")
 print(f"  4. State Strategy → Infant enrollment leaders")
 print(f"  5. Growth Acceleration → Weekly trend patterns")
+print(f"  6. Pareto Analysis (NEW) → 80/20 concentration identified")
+print(f"  7. Monsoon Effect (NEW) → Seasonal impact with statistical test")
 
-print(f"\n📊 VISUALIZATIONS GENERATED: 5 charts in 'output/enrollment/'")
+print(f"\n📊 VISUALIZATIONS GENERATED: 7 charts in 'output/enrollment/'")
 
 print(f"\n💡 KEY ACTIONABLE INSIGHTS:")
 print(f"  → Schedule Anganwadi campaigns in peak enrollment months")
 print(f"  → Investigate adult enrollment gap (potential college-age missing)")
 print(f"  → Replicate best practices from top 10 districts")
 print(f"  → Prioritize birth registry integration in top infant states")
+print(f"  → Focus resources on top Pareto districts for maximum ROI")
+print(f"  → Adjust rural operations for monsoon season impact")
 
 print("\n" + "="*70)
 print("✅ ENROLLMENT DOMAIN ANALYSIS COMPLETE")
 print("="*70)
+

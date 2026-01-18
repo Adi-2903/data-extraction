@@ -1,33 +1,65 @@
+# %%
 """
-Domain Analysis: Demographic Deep Dive
-=======================================
+================================================================================
+DOMAIN ANALYSIS: DEMOGRAPHIC DEEP DIVE
+================================================================================
 
+PURPOSE:
+--------
 This module analyzes DEMOGRAPHIC UPDATE patterns to uncover:
 - Migration corridors (where people move)
 - Seasonal movement patterns (when people move)
 - Update frequency (churner analysis)
 - Regional mobility trends
+- Migration directionality (emigration vs immigration hubs)
+
+WHY DEMOGRAPHIC ANALYSIS MATTERS:
+---------------------------------
+Demographic updates in Aadhaar represent ADDRESS CHANGES. When citizens move,
+they update their address. This data reveals:
+1. Rural-to-urban migration corridors
+2. Seasonal labor movement (harvest seasons, festivals)
+3. Industrial hub inflows (factory/construction zones)
+4. Economic distress signals (mass emigration from a region)
 
 Unlike cross-domain analysis, this focuses purely on address/data corrections
 to reveal hidden population movement patterns.
 
+ANALYSES INCLUDED:
+------------------
+1. Migration Corridors - Which districts receive the most movers?
+2. Seasonal Migration - When do people move most?
+3. Update Frequency - Which states have most mobile populations?
+4. Adult vs Minor Patterns - Workforce vs family migration
+5. Migration Directionality Index (MDI) - Emigration vs immigration hubs
+
+NOTEBOOK USAGE:
+---------------
+Each section is marked with '# %%' for Jupyter cell conversion.
+Run: `jupytext --to notebook domain_demographic.py` to convert.
+
 Author: UIDAI Hackathon 2026 Team
+================================================================================
 """
 
+# %%
+# =============================================================================
+# IMPORTS AND CONFIGURATION
+# =============================================================================
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 import os
-from advanced_formulas import calculate_migration_directionality_index, interpret_mdi
 
-# UTF-8 encoding
+# UTF-8 encoding for emoji support
 sys.stdout.reconfigure(encoding='utf-8')
 
-# Configuration
+# Visualization configuration
 sns.set(style="whitegrid", palette="coolwarm")
 plt.rcParams['figure.figsize'] = (14, 7)
+plt.rcParams['font.size'] = 11
 
 # Create output directory
 os.makedirs('output/demographic', exist_ok=True)
@@ -36,16 +68,95 @@ print("="*70)
 print("🌍 DEMOGRAPHIC DOMAIN ANALYSIS")
 print("="*70)
 
-# Load demographic data
+
+# %%
+# =============================================================================
+# INTEGRATED ADVANCED FORMULAS
+# =============================================================================
+# WHY EMBEDDED HERE (instead of advanced_formulas.py):
+# - Self-contained module for notebook conversion
+# - No external dependencies beyond standard libraries
+# - Each formula includes detailed docstring for understanding
+
+def calculate_migration_directionality_index(df):
+    """
+    Migration Directionality Index (MDI): Identifies emigration vs immigration hubs.
+    
+    FORMULA:
+    --------
+    MDI = (Out_Migration_Proxy - In_Migration_Proxy) / (Out_Migration_Proxy + In_Migration_Proxy)
+    
+    WHERE:
+    ------
+    - Out_Migration_Proxy = Demographic updates / Enrollments
+      (High ratio means many are LEAVING - updating address to new location)
+    - In_Migration_Proxy = Enrollments / Demographic updates
+      (High ratio means many are ARRIVING - new enrollees but few updates yet)
+    
+    INTERPRETATION:
+    ---------------
+    - MDI > +0.5 = Strong emigration source (people leaving)
+    - MDI ≈ 0 = Balanced (similar in/out flows)
+    - MDI < -0.5 = Strong immigration destination (people arriving)
+    
+    WHY THIS MATTERS:
+    -----------------
+    - Emigration sources: May indicate economic distress, need retention programs
+    - Immigration hubs: Need scaled-up demographic update center capacity
+    
+    APPLICATION:
+    ------------
+    Target resource deployment to immigration hubs, retention in emigration sources.
+    Example: "Delhi has MDI = -0.82 (massive immigration sink)"
+    """
+    district_summary = df.groupby('district').agg({
+        'total_enrol': 'sum',
+        'total_demo': 'sum'
+    })
+    
+    # Proxy: High demo + Low enrol = Out-migration (updating address to new location)
+    #        Low demo + High enrol = In-migration (new arrivals enrolling)
+    
+    out_migration_proxy = district_summary['total_demo'] / (district_summary['total_enrol'] + 1)
+    in_migration_proxy = district_summary['total_enrol'] / (district_summary['total_demo'] + 1)
+    
+    # Normalize and calculate MDI
+    mdi = (out_migration_proxy - in_migration_proxy) / (out_migration_proxy + in_migration_proxy + 0.001)
+    
+    return mdi.sort_values(ascending=False)
+
+
+def interpret_mdi(mdi_value):
+    """Interpret Migration Directionality Index with emoji indicators."""
+    if mdi_value > 0.5:
+        return "🔴 Strong emigration source - People leaving"
+    elif mdi_value > 0:
+        return "🟡 Slight emigration tendency"
+    elif mdi_value > -0.5:
+        return "🟡 Slight immigration tendency"
+    else:
+        return "🟢 Strong immigration destination - People arriving"
+
+
+# %%
+# =============================================================================
+# DATA LOADING
+# =============================================================================
 from analysis import load_and_combine, clean_data
 
 demographic_df = clean_data(load_and_combine('dataset/api_data_aadhar_demographic_*.csv'))
 print(f"\n📊 Loaded {len(demographic_df):,} demographic update records")
 
 
+# %%
 # =============================================================================
 # ANALYSIS 1: Migration Corridor Identification
 # =============================================================================
+# WHY MIGRATION CORRIDORS:
+# Districts with HIGH demographic updates are receiving movers from elsewhere.
+# These are "immigration hubs" - likely urban centers or industrial zones.
+# Understanding corridors helps UIDAI pre-position resources.
+
 print("\n" + "="*70)
 print("🚂 ANALYSIS 1: MIGRATION CORRIDORS")
 print("="*70)
@@ -102,9 +213,16 @@ if top10_share > 40:
     print(f"   Recommendation: Deploy dedicated demographic update centers in top 10")
 
 
-# ============================================================================
+# %%
+# =============================================================================
 # ANALYSIS 2: Seasonal Migration Waves
 # =============================================================================
+# WHY SEASONAL ANALYSIS:
+# Migration in India has strong seasonal patterns:
+# - Post-harvest (Oct-Dec): Rural workers move to cities
+# - Festival seasons: Return migration to villages
+# - Academic year start: Student migration
+
 print("\n" + "="*70)
 print("📅 ANALYSIS 2: SEASONAL MIGRATION PATTERNS")
 print("="*70)
@@ -170,6 +288,7 @@ if 'date' in demographic_df.columns:
         print(f"   ACTION: Pre-position mobile update centers in Oct in urban hubs")
 
 
+# %%
 # =============================================================================
 # ANALYSIS 3: Update Frequency (Churner Analysis)
 # =============================================================================
@@ -213,9 +332,15 @@ print(f"    → Urban centers (people arriving from rural areas)")
 print(f"    → Industrial zones (factory/construction hubs)")
 
 
+# %%
 # =============================================================================
 # ANALYSIS 4: Adult vs Minor Update Patterns
 # =============================================================================
+# WHY ADULT VS MINOR:
+# - Adult-dominated updates = workforce migration
+# - Minor-included updates = family migration (more permanent)
+# This helps distinguish temporary labor vs permanent resettlement.
+
 print("\n" + "="*70)
 print("👨‍👩‍👧‍👦 ANALYSIS 4: ADULT VS MINOR UPDATE PATTERNS")
 print("="*70)
@@ -267,16 +392,21 @@ if state_updates_sorted['adult_ratio'].iloc[0] > 70:
     print(f"  ACTION: Focus on employment-linked demographic update incentives")
 
 
+# %%
 # =============================================================================
-# ANALYSIS 5: Migration Directionality Index (Using Advanced Formula)
+# ANALYSIS 5: Migration Directionality Index (MDI)
 # =============================================================================
+# WHY MDI:
+# Simple update counts don't tell us DIRECTION of migration.
+# MDI compares enrollments (new arrivals) vs demographic updates (address changes)
+# to determine if a district is a SOURCE (people leaving) or SINK (people arriving).
+
 print("\n" + "="*70)
 print("↔️ ANALYSIS 5: MIGRATION DIRECTIONALITY INDEX (MDI)")
 print("="*70)
 print("Question: Which districts are emigration sources vs immigration destinations?")
 
 # Load enrollment data for MDI calculation
-from analysis import load_and_combine, clean_data
 enrolment_df = clean_data(load_and_combine('dataset/api_data_aadhar_enrolment_*.csv'))
 
 # Merge enrollment and demographic for MDI
@@ -289,7 +419,7 @@ demo_by_district['total_demo'] = demo_by_district.sum(axis=1)
 mdi_data = pd.merge(enrol_by_district[['total_enrol']], demo_by_district[['total_demo']], 
                     left_index=True, right_index=True, how='outer').fillna(0)
 
-# Calculate MDI using advanced formula
+# Calculate MDI using integrated formula
 mdi_scores = calculate_migration_directionality_index(mdi_data)
 
 # Top emigration sources (positive MDI)
@@ -337,6 +467,7 @@ print(f"  → Emigration Sources: Deploy retention programs, improve local econo
 print(f"  → Immigration Destinations: Scale demographic update center capacity")
 
 
+# %%
 # =============================================================================
 # FINAL SUMMARY
 # =============================================================================
