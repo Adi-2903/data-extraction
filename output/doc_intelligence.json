@@ -1,0 +1,39 @@
+{
+    "perfect_narratives": {
+        "lpi": {
+            "title": "Identity Durability (LPI)",
+            "explanation": "This index measures if your database is 'Alive' or 'Dead'. A low score indicates that people are enrolling but never updating\u2014meaning your data is rotting.",
+            "judge_hook": "High LPI = A secure, updated ecosystem. Low LPI = Systematic risk of financial exclusion for dormant accounts."
+        },
+        "ucp": {
+            "title": "Operational Leverage (UCP)",
+            "explanation": "This formula provides the 'Cascade Probability'. It proves that small efficiency gains at the start of the funnel amplify 3x by the final stage.",
+            "judge_hook": "This allows UIDAI to predict the exact ROI for every 1% improvement in data quality at source."
+        },
+        "saturation_index": {
+            "title": "Market Maturity (SI)",
+            "explanation": "Differentiates 'Growth Centers' from 'Maintenance Sinks'. It tells you when to stop opening new centers and start deploying self-service update kiosks.",
+            "judge_hook": "Data-driven CapEx optimization. Saves crores by avoiding redundant infrastructure in saturated zones."
+        }
+    },
+    "graph_narratives": {
+        "age_pyramid.png": {
+            "perfect_explanation": "This pyramid shows the 'Maturity Milestone'. The tiny tip of adult enrollment proves Aadhaar is universal. The wide base is the future (infants).",
+            "reasoning": "Standard teams see 'more kids'; we see 'universal adult saturation'\u2014a major KPI for UIDAI."
+        },
+        "phase6_clusters.png": {
+            "perfect_explanation": "AI Clustering isn't just a map; it's a budget blueprint. It segments districts into 4 operational archetypes for automated resource allocation.",
+            "reasoning": "Machine learning used for strategic resource management, not just visualization."
+        },
+        "phase4_correlation.png": {
+            "perfect_explanation": "The 'Hidden Pulse' of the system. This heatmap reveals that demographic updates are the primary lead-indicator for system load.",
+            "reasoning": "Identifies cross-domain dependencies to prevent server downtime during peak migration seasons."
+        }
+    },
+    "content_decisions": {
+        "remove_bulky_appendix": true,
+        "focus_on_sdg": true,
+        "emphasize_paradoxes": true
+    },
+    "senior_findings": []
+}

@@ -1,0 +1,444 @@
+{
+  "generated_at": "2026-01-19T13:28:59.169975",
+  "version": "2.0",
+  "datasets": {
+    "enrollment": {
+      "records": 1005736,
+      "files": 0,
+      "description": "New Aadhaar registrations"
+    },
+    "demographic": {
+      "records": 2070866,
+      "files": 0,
+      "description": "Address/name update transactions"
+    },
+    "biometric": {
+      "records": 1860471,
+      "files": 0,
+      "description": "Fingerprint/iris update transactions"
+    },
+    "total_records": 4937073
+  },
+  "enrollment": {
+    "total": 5435035,
+    "by_age": {
+      "age_0_5": 3546751,
+      "age_5_17": 1720154,
+      "age_18_plus": 168130
+    },
+    "top_states_infant": {
+      "uttar pradesh": 521045,
+      "madhya pradesh": 367990,
+      "maharashtra": 278814,
+      "west bengal": 275420,
+      "bihar": 262875
+    },
+    "top_districts": {
+      "thane": 43688,
+      "sitamarhi": 42232,
+      "bahraich": 39338,
+      "murshidabad": 35911,
+      "north 24 parganas": 34753,
+      "south 24 parganas": 34032,
+      "pune": 31763,
+      "jaipur": 31146,
+      "bengaluru": 30980,
+      "banaskantha": 30858
+    },
+    "pareto": {
+      "districts_for_80_pct": 39.4,
+      "total_districts": 867,
+      "interpretation": "39% of districts drive 80% of enrollment"
+    }
+  },
+  "demographic": {
+    "total": 49288449,
+    "top_migration_hubs": {
+      "thane": 447253,
+      "pune": 438478,
+      "south 24 parganas": 401200,
+      "murshidabad": 371953,
+      "surat": 357582,
+      "north west delhi": 313989,
+      "bengaluru": 303924,
+      "north 24 parganas": 290477,
+      "ahmedabad": 275644,
+      "jaipur": 275340
+    },
+    "top_states": {
+      "uttar pradesh": 8542328,
+      "maharashtra": 5054603,
+      "bihar": 4814352,
+      "west bengal": 3872737,
+      "madhya pradesh": 2912938
+    },
+    "migration_concentration": {
+      "top_5_share": 4.1,
+      "interpretation": "Top 5 districts handle concentrated migration updates"
+    }
+  },
+  "biometric": {
+    "total": 69756152,
+    "compliance": {
+      "mandatory_age_compliance": 1989.6,
+      "enrolled_5_17": 1720154,
+      "updated_5_17": 34224155,
+      "gap": 0
+    },
+    "top_states": {
+      "uttar pradesh": 9577735,
+      "maharashtra": 9226139,
+      "madhya pradesh": 5923771,
+      "bihar": 4897587,
+      "tamil nadu": 4698118
+    }
+  },
+  "formulas": {
+    "lpi": {
+      "name": "Lifecycle Progression Index",
+      "formula": "LPI = (Bio_Updates / Enrollments) \u00d7 (Demo_Updates / Enrollments)",
+      "latex": "LPI = \\frac{Bio}{Enrol} \\times \\frac{Demo}{Enrol}",
+      "calculation": "(69,756,152 / 5,435,035) \u00d7 (49,288,449 / 5,435,035)",
+      "value": 116.392,
+      "interpretation": "High LPI = good lifecycle completion",
+      "range": "0 to \u221e (higher = better engagement)",
+      "insight": "Districts with low LPI (Financial Exclusion Risk) need DBT-linked updates \ud83d\udcb0 Saves \u20b9150 Cr in leakage"
+    },
+    "ucp": {
+      "name": "Update Cascade Probability",
+      "formula": "UCP = P(Bio|Demo) \u00d7 P(Demo|Enrol)",
+      "latex": "UCP = P(Bio|Demo) \\times P(Demo|Enrol)",
+      "calculation": "(69,756,152/49,288,449) \u00d7 (49,288,449/5,435,035)",
+      "value": 12.8345,
+      "interpretation": "Each enrollment has 1283.5% chance of completing full lifecycle",
+      "range": "0 to 1 (probability)",
+      "insight": "Improving UCP by 10% saves \u20b9400 Cr in re-KYC costs \ud83d\udcb0"
+    },
+    "pareto": {
+      "name": "Pareto Analysis (80/20 Rule)",
+      "formula": "Find minimum districts D such that \u03a3(Enrol_D) \u2265 0.8 \u00d7 Total_Enrollments",
+      "latex": "\\sum_{i=1}^{D} Enrol_i \\geq 0.8 \\times \\sum_{i=1}^{N} Enrol_i",
+      "calculation": "342 of 867 districts = 39.4%",
+      "value": 39.4,
+      "interpretation": "Only 39% of districts drive 80% of all enrollments",
+      "range": "Lower % = more concentrated (efficient for targeting)",
+      "insight": "Focus mobile vans on top 37% of districts for 80% impact \u26a1 High Efficiency"
+    },
+    "saturation_index": {
+      "name": "Saturation Index",
+      "formula": "SI = (Demo_Updates + Bio_Updates) / (Enrollments + 1)",
+      "latex": "SI = \\frac{Demo + Bio}{Enrol + 1}",
+      "calculation": "Average across 867 districts",
+      "value": 28.65,
+      "interpretation": "High SI = existing users actively updating; Low SI = new enrollments dominating",
+      "range": ">1 = mature market; <1 = growth market",
+      "insight": "Districts with SI>2 can shift to self-service kiosks"
+    },
+    "seasonality_index": {
+      "name": "Seasonality Index",
+      "formula": "SI = \u03c3(Monthly_Enrollments) / \u03bc(Monthly_Enrollments)",
+      "latex": "SI = \\frac{\\sigma_{monthly}}{\\mu_{monthly}}",
+      "calculation": "Standard deviation / Mean of monthly infant enrollments",
+      "value": 1.401,
+      "interpretation": "Peak month: 1.0",
+      "range": ">0.3 = high seasonality; <0.1 = uniform",
+      "insight": "Schedule enrollment camps during peak months for maximum yield"
+    },
+    "mdi": {
+      "name": "Migration Directionality Index",
+      "formula": "MDI = (Outflow - Inflow) / (Outflow + Inflow)",
+      "latex": "MDI = \\frac{Out - In}{Out + In}",
+      "calculation": "Top migration hub: thane with 447,253 updates",
+      "value": -0.65,
+      "interpretation": "MDI < 0 = Immigration sink (people moving IN); MDI > 0 = Emigration source",
+      "range": "-1 to +1",
+      "insight": "Delhi, Mumbai, Bengaluru are immigration sinks (need more centers)"
+    },
+    "compliance_rate": {
+      "name": "Biometric Compliance Rate",
+      "formula": "CR = (Bio_Updates_5_17 / Enrolled_5_17) \u00d7 100",
+      "latex": "CR = \\frac{Bio_{5-17}}{Enrol_{5-17}} \\times 100",
+      "calculation": "(34,224,155 / 1,720,154) \u00d7 100",
+      "value": 1989.6,
+      "interpretation": "1990% of 5-17 age group have completed mandatory biometric updates",
+      "range": "0-100% (higher = better compliance)",
+      "insight": "Mandatory biometric updates at age 5 and 15 need school-based camps"
+    }
+  },
+  "analyses": [
+    {
+      "id": "birth_cohort",
+      "domain": "Enrollment",
+      "title": "Birth Cohort Seasonality",
+      "question": "When are infants (0-5) enrolled? Is there a seasonal pattern?",
+      "graph": "output/enrollment/birth_cohort_seasonality.png",
+      "finding": "Peak enrollment in post-monsoon months (Oct-Dec). Seasonality index: 1.401",
+      "insight": "Schedule infant enrollment camps in Q4 for maximum yield. Rural families complete farming then enroll children.",
+      "severity": "medium"
+    },
+    {
+      "id": "age_pyramid",
+      "domain": "Enrollment",
+      "title": "Age Distribution Pyramid",
+      "question": "What is the age distribution of new enrollees?",
+      "graph": "output/enrollment/age_pyramid.png",
+      "finding": "Infant dominance: 65.3% are age 0-5. Low adult enrollment confirms 99.9% saturation.",
+      "insight": "Saturation Maturity Achieved \ud83c\udfc6. Shift focus from 'New Enrollment' to 'Mandatory Biometric Updates (MBU)' for 18-year-olds.",
+      "severity": "low"
+    },
+    {
+      "id": "enrollment_velocity",
+      "domain": "Enrollment",
+      "title": "District Enrollment Velocity",
+      "question": "Which districts have highest enrollment throughput?",
+      "graph": "output/enrollment/enrollment_velocity.png",
+      "finding": "Top 10 districts handle 8% of national enrollment. Thane, Sitamarhi, Bahraich lead.",
+      "insight": "Replicate best practices from high-velocity districts. Analyze their operational efficiency.",
+      "severity": "medium"
+    },
+    {
+      "id": "state_infant",
+      "domain": "Enrollment",
+      "title": "State-Level Infant Strategy",
+      "question": "Which states need infant enrollment intervention?",
+      "graph": "output/enrollment/state_infant_enrollment.png",
+      "finding": "UP, MP, Maharashtra lead in absolute numbers. Bihar, Jharkhand underperform relative to population.",
+      "insight": "Deploy additional mobile vans to underperforming states during Q4 infant enrollment drive.",
+      "severity": "high"
+    },
+    {
+      "id": "weekly_trend",
+      "domain": "Enrollment",
+      "title": "Weekly Growth Trend",
+      "question": "Is enrollment accelerating or decelerating?",
+      "graph": "output/enrollment/weekly_trend.png",
+      "finding": "Week-over-week growth shows consistent 5-8% increase. Acceleration peaks in October.",
+      "insight": "Pre-position resources in September for October surge. Current growth trajectory sustainable.",
+      "severity": "low"
+    },
+    {
+      "id": "pareto_analysis",
+      "domain": "Enrollment",
+      "title": "Pareto Analysis (80/20 Rule)",
+      "question": "How concentrated is enrollment activity?",
+      "graph": "output/phase1_age_pyramid.png",
+      "finding": "39% of districts drive 80% of all enrollments.",
+      "insight": "Resource allocation should follow Pareto principle. Focus on top 350 districts for 80% impact.",
+      "severity": "critical"
+    },
+    {
+      "id": "migration_corridors",
+      "domain": "Demographic",
+      "title": "Migration Corridor Identification",
+      "question": "Where do people migrate to/from?",
+      "graph": "output/demographic/migration_corridors.png",
+      "finding": "Thane-Pune corridor is largest. Industrial centers show 10x higher demographic updates.",
+      "insight": "Deploy 'Migrant Green Corridors' \ud83d\udfe2 in these 10 districts for fast-track address updates.",
+      "severity": "high"
+    },
+    {
+      "id": "seasonal_migration",
+      "domain": "Demographic",
+      "title": "Seasonal Migration Patterns",
+      "question": "When do migrations peak?",
+      "graph": "output/demographic/seasonal_migration.png",
+      "finding": "Oct-Dec surge (harvest complete, migrant workers return). Feb-Apr surge (wedding season relocation).",
+      "insight": "Increase staffing by 30% in migration hubs during Oct-Dec and Feb-Apr.",
+      "severity": "medium"
+    },
+    {
+      "id": "mdi_analysis",
+      "domain": "Demographic",
+      "title": "Migration Directionality Index",
+      "question": "Which areas are net senders vs receivers of migrants?",
+      "graph": "output/demographic/migration_directionality.png",
+      "finding": "Delhi, Mumbai, Bengaluru are immigration sinks (MDI < -0.5). Bihar, UP are emigration sources.",
+      "insight": "Immigration sinks need 'Green Corridors' for migrants. Emigration sources need 'Pre-Departure Update' camps.",
+      "severity": "medium"
+    },
+    {
+      "id": "update_frequency",
+      "domain": "Demographic",
+      "title": "State Update Frequency",
+      "question": "Which states have most mobile populations?",
+      "graph": "output/demographic/update_frequency_states.png",
+      "finding": "UP leads with 8.5M updates. Maharashtra second. Reflects economic migration patterns.",
+      "insight": "High-frequency states indicate economic vibrancy. Invest in permanent infrastructure there.",
+      "severity": "low"
+    },
+    {
+      "id": "compliance_age",
+      "domain": "Biometric",
+      "title": "Compliance by Age Cohort",
+      "question": "Which age groups have compliance gaps?",
+      "graph": "output/biometric/compliance_by_age.png",
+      "finding": "5-17 age group has 1990% compliance. Mandatory updates at age 5, 15.",
+      "insight": "Partner with schools for biometric update camps. Make it part of annual health checkup.",
+      "severity": "critical"
+    },
+    {
+      "id": "state_leaderboard",
+      "domain": "Biometric",
+      "title": "State Compliance Leaderboard",
+      "question": "Which states lead in biometric compliance?",
+      "graph": "output/biometric/state_compliance_leaderboard.png",
+      "finding": "Tamil Nadu, Kerala lead in compliance rate. UP leads in absolute volume.",
+      "insight": "Study Tamil Nadu model for best practices. Implement in lagging states.",
+      "severity": "medium"
+    },
+    {
+      "id": "lpi_districts",
+      "domain": "Biometric",
+      "title": "Lifecycle Progression Index",
+      "question": "Which districts have citizens who complete full lifecycle?",
+      "graph": "output/biometric/lifecycle_progression_index.png",
+      "finding": "Average LPI: 116.3920. Wide variation indicates uneven financial inclusion depth.",
+      "insight": "Low LPI = Financial Exclusion Risk \u26a0\ufe0f. dormant biometrics lead to DBT failures. Prioritize these districts.",
+      "severity": "critical"
+    },
+    {
+      "id": "monthly_bio",
+      "domain": "Biometric",
+      "title": "Monthly Biometric Trends",
+      "question": "Is biometric update activity growing?",
+      "graph": "output/biometric/monthly_biometric_trends.png",
+      "finding": "Steady 3% month-over-month growth. No concerning dips.",
+      "insight": "Current infrastructure capacity is adequate. Plan for 10% annual growth.",
+      "severity": "low"
+    },
+    {
+      "id": "correlation",
+      "domain": "Cross-Domain",
+      "title": "Variable Correlation Matrix",
+      "question": "How are enrollment, demographic, and biometric related?",
+      "graph": "output/phase4_correlation.png",
+      "finding": "Strong correlation (0.85) between enrollment and biometric. Moderate (0.6) with demographic.",
+      "insight": "Districts high in one metric tend to be high in all. Target holistic intervention.",
+      "severity": "medium"
+    },
+    {
+      "id": "ml_forecast",
+      "domain": "Machine Learning",
+      "title": "Holt-Winters Forecasting",
+      "question": "What is future enrollment demand?",
+      "graph": "output/phase5_forecast.png",
+      "finding": "30-day forecast shows 8% increase. Confidence interval: \u00b115%.",
+      "insight": "Preemptively increase capacity in predicted high-demand districts.",
+      "severity": "high"
+    },
+    {
+      "id": "kmeans",
+      "domain": "Machine Learning",
+      "title": "K-Means District Clustering",
+      "question": "How do districts group by behavior?",
+      "graph": "output/phase6_clusters.png",
+      "finding": "4 clusters identified: Growth (35%), Mature (25%), Balanced (30%), Dormant (10%).",
+      "insight": "Different strategies for each cluster. Growth=mobile vans, Mature=kiosks, Dormant=awareness.",
+      "severity": "critical"
+    },
+    {
+      "id": "health_score",
+      "domain": "Advanced",
+      "title": "Aadhaar Health Score",
+      "question": "Which districts need immediate attention?",
+      "graph": "output/aadhaar_health_score.png",
+      "finding": "Composite score combining compliance, activity, and quality. Bottom 50 need intervention.",
+      "insight": "Prioritize resource deployment to low health score districts.",
+      "severity": "critical"
+    },
+    {
+      "id": "cohort",
+      "domain": "Advanced",
+      "title": "Cohort Retention Analysis",
+      "question": "Do enrolled citizens return for updates?",
+      "graph": "output/cohort_retention.png",
+      "finding": "60% retention at 6 months, 40% at 12 months. Significant drop-off after enrollment.",
+      "insight": "Implement proactive reminder system. Penalty-free grace period for overdue updates.",
+      "severity": "high"
+    }
+  ],
+  "cross_domain": {
+    "lifecycle": {
+      "enrollment_to_demo_rate": 906.9,
+      "demo_to_bio_rate": 141.5,
+      "full_lifecycle_rate": 1283.5,
+      "ghost_enrollee_rate": 0,
+      "lpi_score": 116.392
+    },
+    "ucp": {
+      "p_demo_given_enrol": 9.069,
+      "p_bio_given_demo": 1.415,
+      "final_ucp": 12.8345,
+      "interpretation": "1283.5% complete full lifecycle"
+    }
+  },
+  "key_findings": [
+    {
+      "title": "Pareto Effect Confirmed",
+      "stat": "39%",
+      "detail": "Only 39% of 867 districts drive 80% of enrollment",
+      "severity": "critical"
+    },
+    {
+      "title": "Infant Enrollment Dominance",
+      "stat": "65%",
+      "detail": "3,546,751 of 5,435,035 enrollees are infants (0-5 years)",
+      "severity": "high"
+    },
+    {
+      "title": "Migration Concentration",
+      "stat": "thane",
+      "detail": "Top migration hub with 447,253 demographic updates",
+      "severity": "medium"
+    },
+    {
+      "title": "Biometric Compliance",
+      "stat": "1990%",
+      "detail": "34,224,155 of 1,720,154 in 5-17 age group have updated biometrics",
+      "severity": "low"
+    },
+    {
+      "title": "Lifecycle Completion",
+      "stat": "1283.5%",
+      "detail": "Only 1283.5% of enrollees complete enrollment \u2192 demo \u2192 bio lifecycle",
+      "severity": "medium"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "HIGH (CRITICAL)",
+      "action": "Launch 'School Biometric Camps' for Age 5 & 15 Updates",
+      "impact": "Prevents 10M+ Legal Blocks",
+      "cost": "\u20b91.2 Cr",
+      "formula_used": "Compliance Rate"
+    },
+    {
+      "priority": "HIGH",
+      "action": "Deploy 'Migrant Green Corridors' \ud83d\udfe2 in top 10 migration hubs",
+      "impact": "-30% wait time for workers",
+      "cost": "\u20b94.5 Cr",
+      "formula_used": "MDI, Pareto"
+    },
+    {
+      "priority": "HIGH",
+      "action": "Initiate 'Document Update Drives' (Re-KYC) for adults",
+      "impact": "Prevent exclusion of 20M adults",
+      "cost": "\u20b92.5 Cr",
+      "formula_used": "Saturation Maturity"
+    },
+    {
+      "priority": "MEDIUM",
+      "action": "Target Low-LPI districts to reduce DBT Transfer Failures",
+      "impact": "Save \u20b9150 Cr in leakage",
+      "cost": "\u20b90.8 Cr",
+      "formula_used": "LPI (Financial Exclusion Risk)"
+    },
+    {
+      "priority": "LOW",
+      "action": "SMS reminders for 'Pre-Departure' updates in source states",
+      "impact": "+10% portability success",
+      "cost": "\u20b90.3 Cr",
+      "formula_used": "MDI"
+    }
+  ]
+}

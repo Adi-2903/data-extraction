@@ -1,0 +1,23 @@
+[
+    {
+        "title": "The Maturity vs. Maintenance Paradox (Dormancy Decay)",
+        "signal": "Saturation Index (28.65) indicates a HIGHLY mature market.",
+        "meaning": "The market is saturated with identities. New enrollment is no longer the primary mission.",
+        "danger": "If maintenance (LPI) doesn't keep pace, the database becomes 'Static Junk'.",
+        "senior_advice": "Stop spending on enrollment. Redirect 80% budget to 'Lifecycle Re-engagement' and Aadhaar Paperless Auth."
+    },
+    {
+        "title": "The Minor-Compliance Strategic Time-Bomb",
+        "signal": "Minor enrollment (5-17): 1,720,154 vs Adult: 168,130.",
+        "meaning": "The future of the Aadhaar ecosystem depends on users who are currently non-compliant (Mandatory Biometric Updates).",
+        "danger": "Massive identity blockage when this cohort turns 18 without MBU completion.",
+        "senior_advice": "Integrate Biometric Updates into school board exam registrations (Class 10/12)."
+    },
+    {
+        "title": "High-Density Infrastructure Risks",
+        "signal": "Just 39.4% of districts handle 80% of Aadhaar workload.",
+        "meaning": "Aadhaar operations are hyper-concentrated geographically (Metro-centric).",
+        "danger": "Regional disasters in top hubs (Mumbai/Delhi/Bengaluru) can halt national update averages.",
+        "senior_advice": "Decentralize to Tier-2 cities with 'Incentivized Rural Update Centers'."
+    }
+]

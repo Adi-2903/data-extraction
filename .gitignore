@@ -31,3 +31,11 @@ Thumbs.db
 
 # Planning/strategy documents (keep in repo but listed for reference)
 # DATA_STRATEGY_ANALYSIS.md
+
+# Large Datasets
+dataset/
+dataset_cleaned/
+
+# Local AI Meta
+.agent/
+archived_files/
